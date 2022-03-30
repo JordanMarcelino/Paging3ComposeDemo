@@ -96,6 +96,10 @@ dependencies {
     implementation 'com.google.accompanist:accompanist-coil:0.15.0'
     implementation("io.coil-kt:coil-compose:2.0.0-rc01")
 
+    // Paging 3
+    implementation("androidx.paging:paging-compose:1.0.0-alpha14")
+    implementation "androidx.room:room-paging:2.5.0-alpha01"
+
     //Dagger - Hilt
     implementation 'com.google.dagger:hilt-android:2.41'
     kapt 'com.google.dagger:hilt-compiler:2.41'
