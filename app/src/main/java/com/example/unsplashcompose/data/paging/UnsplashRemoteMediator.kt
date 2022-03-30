@@ -9,6 +9,8 @@ import com.example.unsplashcompose.data.db.UnsplashDatabase
 import com.example.unsplashcompose.data.model.UnsplashImage
 import com.example.unsplashcompose.data.model.UnsplashRemoteKeys
 import com.example.unsplashcompose.data.remote.UnsplashRemoteDataSource
+import retrofit2.HttpException
+import java.io.IOException
 
 
 @ExperimentalPagingApi
@@ -32,30 +34,25 @@ class UnsplashRemoteMediator(
                 }
                 LoadType.PREPEND -> {
                     val remoteKeys = getRemoteKeyForFirstItem(state)
-                    val prevPage = remoteKeys?.let {
-                        it.prevPage ?: return MediatorResult.Success(
-                            endOfPaginationReached = remoteKeys != null
-                        )
-                    }
-
+                    val prevPage = remoteKeys?.prevPage ?: return MediatorResult.Success(
+                        endOfPaginationReached = true
+                    )
                     prevPage
                 }
                 LoadType.APPEND -> {
                     val remoteKeys = getRemoteKeyForLastItem(state)
-                    val nextPage = remoteKeys?.let {
-                        it.nextPage ?: return MediatorResult.Success(
-                            endOfPaginationReached = remoteKeys != null
-                        )
-                    }
+                    val nextPage = remoteKeys?.nextPage ?: return MediatorResult.Success(
+                        endOfPaginationReached = true
+                    )
                     nextPage
                 }
             }
 
-            val response = currentPage?.let { remoteDataSource.getImages(it) }
-            val endOfPaginationReached = response?.isEmpty()
+            val response = remoteDataSource.getImages(currentPage)
+            val endOfPaginationReached = response.isEmpty()
 
-            val prevPage = if (currentPage == 1) null else currentPage?.minus(1)
-            val nextPage = if (endOfPaginationReached == true) null else currentPage?.plus(1)
+            val prevPage = if (currentPage == 1) null else currentPage - 1
+            val nextPage = if (endOfPaginationReached) null else currentPage + 1
 
 
             unsplashDatabase.withTransaction {
@@ -64,20 +61,19 @@ class UnsplashRemoteMediator(
                     unsplashRemoteKeysDao.deleteRemoteKeys()
                 }
 
-                response?.let { unsplashImageDao.addImages(it) }
-                val keys = response?.let { list ->
-                    list.map { image ->
-                        image.toRemoteKeys(
-                            prevPage = prevPage,
-                            nextPage = nextPage
-                        )
-                    }
+                unsplashImageDao.addImages(response)
+                val keys = response.map { image ->
+                    image.toRemoteKeys(
+                        prevPage, nextPage
+                    )
                 }
-                keys?.let { unsplashRemoteKeysDao.addRemoteKeys(it) }
+                unsplashRemoteKeysDao.addRemoteKeys(keys)
             }
 
-            MediatorResult.Success(endOfPaginationReached = endOfPaginationReached == true)
-        } catch (e: Exception) {
+            MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
+        } catch (e: HttpException) {
+            MediatorResult.Error(e)
+        } catch (e: IOException) {
             MediatorResult.Error(e)
         }
     }
@@ -96,7 +92,7 @@ class UnsplashRemoteMediator(
         state: PagingState<Int, UnsplashImage>
     ): UnsplashRemoteKeys? {
         return state.firstItemOrNull()?.let { image ->
-            image.id?.let { id ->
+            image.id.let { id ->
                 unsplashRemoteKeysDao.getRemoteKeys(id)
             }
         }
@@ -106,7 +102,7 @@ class UnsplashRemoteMediator(
         state: PagingState<Int, UnsplashImage>
     ): UnsplashRemoteKeys? {
         return state.lastItemOrNull()?.let { image ->
-            image.id?.let { id ->
+            image.id.let { id ->
                 unsplashRemoteKeysDao.getRemoteKeys(id)
             }
         }

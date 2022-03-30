@@ -11,7 +11,7 @@ import com.google.gson.annotations.SerializedName
 data class UnsplashImage(
     @PrimaryKey(autoGenerate = false)
     @SerializedName("id")
-    val id: String?,
+    val id: String,
     @SerializedName("likes")
     val likes: Int?,
     @Embedded

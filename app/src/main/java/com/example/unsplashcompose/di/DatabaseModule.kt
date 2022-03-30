@@ -6,9 +6,14 @@ import com.example.unsplashcompose.data.db.UnsplashDatabase
 import com.example.unsplashcompose.data.db.UnsplashImageDao
 import com.example.unsplashcompose.data.db.UnsplashRemoteKeysDao
 import com.example.unsplashcompose.util.Constant.UNSPLASH_DATABASE
+import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+@Module
+@InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
     @Provides
