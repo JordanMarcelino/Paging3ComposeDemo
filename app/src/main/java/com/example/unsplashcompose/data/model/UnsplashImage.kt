@@ -20,4 +20,10 @@ data class UnsplashImage(
     @Embedded
     @SerializedName("user")
     val user: User?,
-)
+){
+    fun toRemoteKeys(prevPage : Int?, nextPage : Int?) : UnsplashRemoteKeys = UnsplashRemoteKeys(
+        id = id,
+        prevPage = prevPage,
+        nextPage = nextPage
+    )
+}
