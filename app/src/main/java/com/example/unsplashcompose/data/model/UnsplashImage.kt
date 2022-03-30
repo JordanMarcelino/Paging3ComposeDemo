@@ -3,11 +3,13 @@ package com.example.unsplashcompose.data.model
 
 import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.example.unsplashcompose.util.Constant.UNSPLASH_IMAGE_TABLE
 import com.google.gson.annotations.SerializedName
 
-@Entity(UNSPLASH_IMAGE_TABLE)
+@Entity(tableName = UNSPLASH_IMAGE_TABLE)
 data class UnsplashImage(
+    @PrimaryKey(autoGenerate = false)
     @SerializedName("id")
     val id: String?,
     @SerializedName("likes")
