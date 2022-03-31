@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface UnsplashRepository {
 
     fun getImages() : Flow<PagingData<UnsplashImage>>
+    fun getSearchedImage(query : String) : Flow<PagingData<UnsplashImage>>
 }

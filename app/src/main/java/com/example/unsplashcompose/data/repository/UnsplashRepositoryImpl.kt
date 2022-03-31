@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.example.unsplashcompose.data.db.UnsplashDatabase
 import com.example.unsplashcompose.data.model.UnsplashImage
+import com.example.unsplashcompose.data.paging.SearchPagingSource
 import com.example.unsplashcompose.data.paging.UnsplashRemoteMediator
 import com.example.unsplashcompose.data.remote.UnsplashRemoteDataSource
 import com.example.unsplashcompose.domain.repository.UnsplashRepository
@@ -27,6 +28,13 @@ class UnsplashRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = PER_PAGE),
             remoteMediator = UnsplashRemoteMediator(remoteDataSource, unsplashDatabase),
             pagingSourceFactory = pagingSourceFactory
+        ).flow
+    }
+
+    override fun getSearchedImage(query: String): Flow<PagingData<UnsplashImage>> {
+        return Pager(
+            config = PagingConfig(pageSize = PER_PAGE),
+            pagingSourceFactory = {SearchPagingSource(remoteDataSource, query)}
         ).flow
     }
 }
